@@ -4,7 +4,7 @@
 /**********   #INCLUDES            **********/
 
 /**********   #DEFINES             **********/
-#define VERSION_NR 104     		// Versionsnummer * 100   Beispiel: 100 = 1.00; ACHTUNG: keine fuehrende 0!
+#define VERSION_NR 105     		// Versionsnummer * 100   Beispiel: 100 = 1.00; ACHTUNG: keine fuehrende 0!
 #define DEVICE_CLASS_ID 0x4300	// RunF (Rotalign touch)-ID 4300(h)
 #define SERIALNUMBER 0x0001		// Seriennummer (wird in HW-Info ausgegeben)
 #define PHW 140					// Platinenhardwarestand 1.40 (erste Version war 1.00)

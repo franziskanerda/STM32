@@ -1,8 +1,8 @@
-// Um ein einzelnes C File bzw Teile davon für Debugzwecke nicht zu optimieren kann man den
+// Um ein einzelnes C File bzw Teile davon fï¿½r Debugzwecke nicht zu optimieren kann man den
 // betreffenden Sourcecode mit den Zeilen
 // #pragma GCC optimize 0
 // #pragma GCC reset_options
-// umgeben. Wichtig ist das die geänderte Optimierung mit dem reset_options wieder resettet wird!
+// umgeben. Wichtig ist das die geï¿½nderte Optimierung mit dem reset_options wieder resettet wird!
 
 /**********   #INCLUDES            **********/
 #include "system.h"
@@ -49,9 +49,9 @@ int main( void )
 	RCC_Configuration_On();						// wichtige Takte initialisieren
 	RTC_Configuration();						// RTC starten, falls noch nicht geschehen
 
-	// Der SysTick Timer wird zur Erzeugung von 10ms Interrupts verwendet. Der Timer läuft mit
-	// 1MHz. Reloadvalue auf 9999 (10000 - 1) ergibt 10ms. Höchste Priorität damit andere IRQs
-	// zuverlässig auf Delay-Routinen zugreifen können.
+	// Der SysTick Timer wird zur Erzeugung von 10ms Interrupts verwendet. Der Timer lï¿½uft mit
+	// 1MHz. Reloadvalue auf 9999 (10000 - 1) ergibt 10ms. Hï¿½chste Prioritï¿½t damit andere IRQs
+	// zuverlï¿½ssig auf Delay-Routinen zugreifen kï¿½nnen.
 	SysTick->LOAD = SYSTICK_RELOAD_VALUE;
 	NVIC_SetPriority( SysTick_IRQn, 0 );
 	SysTick->VAL = 0x00;
@@ -65,59 +65,20 @@ int main( void )
 	GpioInit();									// Power IO-Initialisierung
 	PowerState = POWER_UNKNOWN;					// Grundstatus
 	ChargerType = CHRG_NODETECT;				// Grundeinstellung
-	PowerInit();								// erst mal alles abschalten außer 3V3 und 5V
+	PowerInit();								// erst mal alles abschalten auï¿½er 3V3 und 5V
 
 	// Tasks initialisieren
 	InitTaskList();
 	SetTaskState( SAGE_TASK, SageTsk_Init );
 	DispBacklight.Mode = 1;
 	InitLedState(); RgbLedState.GeneralBrightness = 1001;
-	if (DET_TEMPPWROFF) SetLedState( LED_RGB4_RED, 500, 0, 0, 1500, 100, 100 );
 
-	// Akku-Spannungs- und Widerstandswerte aus dem Flash lesen. Wenn nicht vorhanden: Standardwerte
-/*	if ( (BatData->mfgmagic1 == 0x01020304) && (BatData->mfgmagic2 == 0x04030201) )
+	for (loop=0; loop<100; loop++)
 	{
-		// wenn Kapazität mehr als 30% vom erwarteten Wert (22 Ah) abweicht: Standardwerte verwenden
-		if ( (BatData->calib_capacity < 15400) || (BatData->calib_capacity > 28600) )
-		{
-			for (loop=0; loop<100; loop++)
-			{
-				AkkuThreas[loop] = StdAkkuThreas[loop];
-				AkkuIntRes[loop] = StdAkkuIntRes[loop];
-			}
-			BatState.IntCalibState = CALIB_NOK;
-		}
-		// wenn Kapazität mehr als 15% vom erwarteten Wert (22 Ah) abweicht: Standardwerte dazumitteln
-		else if ( (BatData->calib_capacity < 18700) || (BatData->calib_capacity > 25300) )
-		{
-			for (loop=0; loop<100; loop++)
-			{
-				AkkuThreas[loop] = (BatData->voltage_array[99-loop] + StdAkkuThreas[loop]) >> 1;
-				AkkuIntRes[loop] = ((u8)BatData->res_array[99-loop] + StdAkkuIntRes[loop]) >> 1;
-			}
-			BatState.IntCalibState = CALIB_DONE;
-		}
-		// wenn der Messwert maximal 15% von 22 Ah abweicht: Messwerte verwenden
-		else
-		{
-			for (loop=0; loop<100; loop++)
-			{
-				AkkuThreas[loop] = BatData->voltage_array[99-loop];
-				AkkuIntRes[loop] = (u8)BatData->res_array[99-loop];
-			}
-			BatState.IntCalibState = CALIB_DONE;
-		}
-	} 
-	// keine Messwerte vorhanden: Standardwerte verwenden
-	else */
-	{
-		for (loop=0; loop<100; loop++)
-		{
-			AkkuThreas[loop] = StdAkkuThreas[loop];
-			AkkuIntRes[loop] = StdAkkuIntRes[loop];
-		}
-		BatState.IntCalibState = CALIB_NOT_DONE;
+		AkkuThreas[loop] = StdAkkuThreas[loop];
+		AkkuIntRes[loop] = StdAkkuIntRes[loop];
 	}
+	BatState.IntCalibState = CALIB_NOT_DONE;
 
 	// LED-Akkuanzeige vor dem Einschalten	
 	for (loop=0; loop<10; loop++)
@@ -144,7 +105,10 @@ int main( void )
 		if (((AltAkkuMittelwert-AkkuMittelwert) > 3) || ((AkkuMittelwert - AltAkkuMittelwert) > 3)) 
 			AkkuMittelwert = (AltAkkuMittelwert + AkkuMittelwert) >> 1;
 		SetLedState( LED_RGB1_WHITE | LED_RGB2_WHITE | LED_RGB3_WHITE, 0, 0, 0, 0, 0, 0 );
-		
+
+		if (loop == 4) 
+		{ if (DET_TEMPPWROFF) SetLedState( LED_RGB4_RED, 500, 0, 0, 1500, 250, 250 ); }
+
 		if (loop==8)
 		{
 			CheckExtPower();
