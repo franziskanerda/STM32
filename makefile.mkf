@@ -1,0 +1,138 @@
+# Diese Datei nur mit einem Editor bearbeiten, der Tabs NICHT in Spaces umwandelt!!
+
+# Define project name
+NAME    = runf_app
+CRC_PLACE_HOLDER=0x3101
+
+# Define c source code files
+SRCC    = crt0.c main.c I2C.c info.c irq.c globals.c syslib.c task.c serial.c crc.c comm.c sage.c syscalls.c power.c flash.c
+
+# Define assembler source code files
+SRCS    =
+
+# Define additional object files to link in
+SRCO    =
+
+CRC_PLACE_HOLDER=0x3101
+
+# Libraries to link in
+LIB1    = ../GccLib/libc.a
+LIB2    = ../GccLib/libm.a
+LIB3    = ../GccLib/libgcc.a
+LIB4    = ../STM32StdLib/stm32stdlib_md_vl.a
+LIB5    =
+LIB6    = 
+LIB7    =
+LIB8    =
+LIB9    =
+LIBS    = $(LIB1) $(LIB2) $(LIB3) $(LIB4) $(LIB5) $(LIB6) $(LIB7) $(LIB8) $(LIB9)
+
+INCDIR = -I. -I../STM32StdLib
+
+TOOLSDIR	=
+
+# Name of assembler, compiler and linker
+TOOLPFX = "C:\tools\stm32_10_3_gcc\bin\arm-none-eabi"
+AS=$(TOOLPFX)-as
+CC=$(TOOLPFX)-gcc
+LD=$(TOOLPFX)-ld
+
+# Command line parameter for assembler, compiler and linker
+#CCLFLAGS = -combine -mthumb -mcpu=cortex-m3 -O2 -g -Wunused -Winline -Wall -D STM32F10X_MD_VL -D USE_STDPERIPH_DRIVER $(INCDIR) \
+#           -T $(NAME).ld -u _start -static -nostartfiles -nostdlib  -L ..\GccLib -Wl,-Map=$(NAME).map,--gc-sections \
+#           -ffunction-sections 
+
+CCLFLAGS = -mthumb -mcpu=cortex-m3 -O2 -g -Wunused -Winline -Wall -D STM32F10X_MD_VL -ffunction-sections \
+			  -D USE_STDPERIPH_DRIVER $(INCDIR) -T $(NAME).ld -u _start -static -nostartfiles -nostdlib \
+			  -L ../GccLib -Wl,-Map=$(NAME).map,--gc-sections -DCRC_PLACE_HOLDER=$(CRC_PLACE_HOLDER)
+
+#uncrustify = $(suffix $(notdir $(wildcard ../../Tools/CompileTools/*ncrustify.exe)))
+
+#####################################################################################################################
+.PHONY: all
+all: prebuild $(NAME).elf
+
+#####################################################################################################################
+.PHONY: rebuild
+rebuild: clean all
+
+#####################################################################################################################
+.PHONY: clean
+clean:
+	@rm -f *.d
+	@rm -f *.o
+	@rm -f *.elf
+	@rm -f *.bin
+	@rm -f $(NAME).hex
+	@rm -f $(NAME)_pure.hex
+	@rm -f *.map
+	@rm -f *.lst
+	@rm -f *.dbi 
+	@rm -f *.ctx 
+	@rm -f *.xdb 
+	@rm -f *.uncrustify
+	@rm -f *.dat
+
+#####################################################################################################################
+.PHONY: prebuild
+prebuild:
+	@rm -f $(NAME).elf 
+	@rm -f $(NAME).hex  
+	@rm -f $(NAME)_pure.hex  
+	@rm -f $(NAME).lst  
+	@rm -f $(NAME).map
+	@rm -f *.dat
+	@echo GCC compiler version: $< $(shell $(CC) -dumpversion)	
+
+#	@rem Code-Beautyfier aufrufen
+#ifeq ($(uncrustify),.exe)
+#	@echo - Beautifing the code -
+#	-@for %n in (*.c *.h) do @..\..\Tools\CompileTools\uncrustify.exe -q -l C --replace --no-backup -c uncrustify.cfg %n
+#else
+#	@echo - Uncrustify not found, skipping code beautifying -
+#endif
+
+
+
+#####################################################################################################################
+$(NAME).elf: $(SRCC) $(SRCS) $(SRCO) $(LIBS) makefile.mkf $(NAME).ld
+	@echo - Compiling and Linking -
+	@$(CC) $(CCLFLAGS) $(SRCC) $(SRCS) $(SRCO) $(LIBS) -o $(NAME).elf
+	@$(TOOLPFX)-objdump -dS $(NAME).elf >$(NAME).lst
+#	@$(TOOLPFX)-objcopy -O ihex -R .app_rst $(NAME).elf $(NAME)_pure.hex
+	@$(TOOLPFX)-objcopy -O ihex $(NAME).elf $(NAME)_pure.hex
+	@$(TOOLPFX)-size $(NAME).elf
+	@$(TOOLPFX)-nm -n $(NAME).elf >>$(NAME).map
+	@$(TOOLPFX)-objcopy -O binary  $(NAME).elf $(NAME)_pure.bin
+	
+	@echo Die define Zeile nach ver.dat extrahieren
+	@echo "# Application = runf_app"> ver.dat
+	@echo "# Application = runf_app"> verx.dat
+	@sed15 -e "/.*define DEVICE_CLASS_ID/!d;s/.*define DEVICE_CLASS_ID[ ]* \([0-9x]*\).*/# DeviceID = \1/" info.h >> ver.dat
+	@sed15 -e "/.*define DEVICE_CLASS_ID/!d;s/.*define DEVICE_CLASS_ID[ ]* \([0-9x]*\).*/# Device-ID (hex) = \1/" info.h >> verx.dat
+	@sed15 -e "/.*define VERSION_NR/!d;s/.*define VERSION_NR[ ]* \([0-9]*\).*/# Version = \1/" info.h >> ver.dat
+	@sed15 -e "/.*define VERSION_NR/!d;s/.*define VERSION_NR[ ]* \([0-9]*\).*/# Version = \1/" info.h >> verx.dat
+	@echo "# free line for future use"> extension.dat
+	@echo "# free line for future use">> extension.dat
+	@echo Crc in die Infostruktur schreiben lassen
+	@ChangeCrcInIntelHex.Exe $(NAME)_pure.hex $(CRC_PLACE_HOLDER)
+
+	@echo Die VERSION_BUILD Zeile aus ver.dat an den Anfang des
+	@echo Hex-Files schreiben
+#	@copy ver.dat /B + DateTime.txt /B + $(NAME)_pure.bin /B $(NAME).bin 
+#	@copy verx.dat /B + DateTime.txt /B + $(NAME)_pure.hex /B upd.dat  
+	@creat_fw_images.bat
+
+	@echo Im Hauptverzeichniss aufr�umen
+	@rm -f *.d  
+	@rm -f ver.dat
+	@rm -f verx.dat
+#	@rm -f upd.dat	
+	@rm -f extension.dat  
+	@rm -f DateTime.txt  
+	@rm -f $(NAME).hex  
+	@rm -f $(NAME)_pure.hex  
+	@rename_hex_file.bat
+
+upload: $(NAME).elf
+	openocd -f stm32f100_openocd.cfg -c "init" -c "targets" -c "program_device ()"

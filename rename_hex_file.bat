@@ -1,0 +1,1 @@
+@ren upd.dat runf_app.hex
