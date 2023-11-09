@@ -1,7 +1,7 @@
 //#pragma GCC optimize 0
 
 /** Description        *******************************************************************************/
-// USART1 wird fï¿½r RS232 verwendet.
+// USART1 wird für RS232 verwendet.
 
 /*
 Senden: Es muss zuerst die tx_buf-Struktur initialisiert werden, d.h. zu sendende Daten in
@@ -15,13 +15,13 @@ auf idle gestellt.
 
 Empfangen (nur RS232): Die DMA-Engine wird so konfiguriert (in ResetRxBuffer) das empfangene Bytes ohne
 Softwarebeteiligung in die jeweiligen Empfangsbuffer (rx_buf[x]->buf) geschrieben werden. Dazu wird
-die zu ï¿½bertragende Lï¿½nge in der DMA-Engine auf die Grï¿½sse de Empfangspuffers gesetzt. Eine Ende-
+die zu übertragende Länge in der DMA-Engine auf die Grösse de Empfangspuffers gesetzt. Eine Ende-
 Erkennung erfolgt durch DMA nicht weil im vorraus ja unbekannt ist wie lange die zu empfangenden
-Daten sind. Fï¿½r die Ende-Erkennung werden die UARTs so konfiguriert das bei einer Idle-Bedingung
-(=RX-Leitung ist nach einem empfangegem Zeichen 1.5 x Zeit fï¿½r ein Byte ruhig) oder bei einem Fehler im
+Daten sind. Für die Ende-Erkennung werden die UARTs so konfiguriert das bei einer Idle-Bedingung
+(=RX-Leitung ist nach einem empfangegem Zeichen 1.5 x Zeit für ein Byte ruhig) oder bei einem Fehler im
 empfangenem Zeichen ein IRQ generiert wird (USART1_IRQHandlerUSART4_IRQHandler).
-Der Irq stellt den Empfangstask dann auf "RxTsk_CheckForTele". Der Empfangstask prï¿½ft dann den
-Empfangsbuffer auf ein vollstï¿½ndig angekommenes Telegramm (CheckForTele) und veranlasst
+Der Irq stellt den Empfangstask dann auf "RxTsk_CheckForTele". Der Empfangstask prüft dann den
+Empfangsbuffer auf ein vollständig angekommenes Telegramm (CheckForTele) und veranlasst
 die Aktion (DoTele).
 */
 
@@ -50,7 +50,7 @@ typedef struct TxBufStrct_s
 {
 	u8  buf[TX_BUF_SIZE];    	// die zu sendenden Daten
 	u32 datalen;               	// Anzahl zu sendender Bytes
-	u32 datapos;               	// Positionsspeicher. Anzahl der bereits ï¿½bertragenen Daten von buf
+	u32 datapos;               	// Positionsspeicher. Anzahl der bereits übertragenen Daten von buf
 	u16 crc;             		// CRC Pruefsumme
 	u8  status;             	// siehe #define TXBUF_
 } TxBufStrct;
@@ -146,7 +146,7 @@ s16 InitSerial( u8 Channel, u32 Baudrate, u8 Mode )
 Wartet max 10ms bis der TX Puffer frei wird. Wenn er dann immer noch belegt ist wird er freigemacht
 weil von einem Fehler ausgegangen werden muss.
 
-Return:  0 - TX verfï¿½gbar
+Return:  0 - TX verfügbar
 ******************************************************************************************************/
 s16 WaitForTxBufferFree( void )
 {
@@ -192,7 +192,7 @@ void WaitTillSent( void )
 /******************************************************************************************************
                                              SendTxBuffer
 -------------------------------------------------------------------------------------------------------
-Schickt den tx_buf ï¿½ber den angegebenen Kommunikationskanal
+Schickt den tx_buf über den angegebenen Kommunikationskanal
 
 Parameter:
    Channel:  siehe #defines COM_CHANNEL_x
@@ -206,7 +206,7 @@ s16 SendTxBuffer( u8 Channel )
 
    tx_buf.datapos = 0;
    
-   // DMA und passenden IRQ fï¿½r den DMA-Abschluss konfigurieren
+   // DMA und passenden IRQ für den DMA-Abschluss konfigurieren
    dis.DMA_MemoryBaseAddr = (u32)tx_buf.buf;
    dis.DMA_DIR = DMA_DIR_PeripheralDST;
    dis.DMA_BufferSize = tx_buf.datalen;
@@ -230,7 +230,7 @@ s16 SendTxBuffer( u8 Channel )
 /******************************************************************************************************
                                                SendData
 -------------------------------------------------------------------------------------------------------
-Schickt Daten raw ï¿½ber den Kommunikationskanal
+Schickt Daten raw über den Kommunikationskanal
 
 Parameter:
    Data:     Zeiger auf Daten.
@@ -258,7 +258,7 @@ s16 SendData( const void *Data, u32 DataLen, u8 Channel )
 /******************************************************************************************************
                                                SendTeleCh
 -------------------------------------------------------------------------------------------------------
-Sendet ein Telegramm ï¿½ber den angegebenen Kommunikationskanal
+Sendet ein Telegramm über den angegebenen Kommunikationskanal
 
 Parameter:
   Tid:      Telegramm-ID
@@ -284,9 +284,9 @@ Kodiert daten nach der NGS Telegrammspezifikation
 
 Parameter:
    Data:     Zeiger auf zu kodierende daten
-   DataLen:  Lï¿½nge der zu kodierenden Daten in byte
+   DataLen:  Länge der zu kodierenden Daten in byte
    DestPtr:  Zeiger auf Zeiger wohin die kodierten Daten geschrieben werden sollen. Der Zeiger wird
-             entsprechend der kodierten Datenmenge weitergefï¿½hrt.
+             entsprechend der kodierten Datenmenge weitergeführt.
 
 Return:  0 - ok
         -1 - TX Buffer voll
@@ -332,7 +332,7 @@ End:
 /******************************************************************************************************
                                              SendTeleFirst
 -------------------------------------------------------------------------------------------------------
-Erster Teil einer Telegrammï¿½bertragung. Schreibt das Startzeichen und den Header in tx_buf.
+Erster Teil einer Telegrammübertragung. Schreibt das Startzeichen und den Header in tx_buf.
 
 Parameter:
   Tid:      Telegramm-ID
@@ -372,7 +372,7 @@ s16 SendTeleFirst( u16 Tid, RxBufStrct *rxb )
    head.reserved[1] = 0;
    head.reserved[2] = 0;
 
-   // CRC ï¿½ber den Header rechnen
+   // CRC über den Header rechnen
    tx_buf.crc = CalcCrc16RunTasks( 0, &head, sizeof(head) );
 
    dp = tx_buf.buf;
@@ -385,7 +385,7 @@ s16 SendTeleFirst( u16 Tid, RxBufStrct *rxb )
       tx_buf.status = TXBUF_IDLE;
       return -2;
    }
-   tx_buf.datalen = (u32)(dp - tx_buf.buf); // Telegrammlï¿½nge ausrechnen
+   tx_buf.datalen = (u32)(dp - tx_buf.buf); // Telegrammlänge ausrechnen
 
    return 0;
 }
@@ -393,7 +393,7 @@ s16 SendTeleFirst( u16 Tid, RxBufStrct *rxb )
 /******************************************************************************************************
                                                SendTeleNext
 -------------------------------------------------------------------------------------------------------
-Nï¿½chster Teil einer Telegrammï¿½bertragung. Schreibt einen weiteren Datenblock nach tx_buf.
+Nächster Teil einer Telegrammübertragung. Schreibt einen weiteren Datenblock nach tx_buf.
 
 
 Parameter:
@@ -408,7 +408,7 @@ s16 SendTeleNext( const void *Data, u32 DataLen )
    s16 status;
    u8  *dp;      // destination pointer
 
-   // CRC ï¿½ber die Daten weiterrechnen
+   // CRC über die Daten weiterrechnen
    tx_buf.crc = CalcCrc16RunTasks( tx_buf.crc, Data, DataLen );
 
    dp = tx_buf.buf + tx_buf.datalen;
@@ -421,14 +421,14 @@ s16 SendTeleNext( const void *Data, u32 DataLen )
       return -2;
    }
 
-   tx_buf.datalen = (u32)(dp - tx_buf.buf); // Telegrammlï¿½nge ausrechnen
+   tx_buf.datalen = (u32)(dp - tx_buf.buf); // Telegrammlänge ausrechnen
    return 0;
 }
 
 /******************************************************************************************************
                                                SendTeleLast
 -------------------------------------------------------------------------------------------------------
-Letzter Teil einer Telegrammï¿½bertragung. Schreibt die CRC und das Stopzeichen und sendet ab.
+Letzter Teil einer Telegrammübertragung. Schreibt die CRC und das Stopzeichen und sendet ab.
 
 
 Parameter:
@@ -456,7 +456,7 @@ s16 SendTeleLast( RxBufStrct *rxb )
    // Mit Telegramstop abschliessen
    *dp++ = RS_STOP_CHAR;
 
-   tx_buf.datalen = (u32)(dp - tx_buf.buf); // Telegrammlï¿½nge ausrechnen
+   tx_buf.datalen = (u32)(dp - tx_buf.buf); // Telegrammlänge ausrechnen
 
    return SendTxBuffer( rxb->channel );
 }
@@ -464,7 +464,7 @@ s16 SendTeleLast( RxBufStrct *rxb )
 /******************************************************************************************************
                                                SendTele
 -------------------------------------------------------------------------------------------------------
-Sendet ein Telegramm ï¿½ber den angegebenen Kommunikationskanal
+Sendet ein Telegramm über den angegebenen Kommunikationskanal
 
 
 Parameter:
@@ -546,7 +546,7 @@ void DMA1_Channel4_IRQHandler( void )
    // Test on DMA1 Channel7 Transfer Complete interrupt
    if( DMA_GetITStatus( DMA1_IT_TC4 ) )
    {
-      USART_ClearFlag( USART1, USART_FLAG_TC ); // Transmission completed Flag lï¿½schen
+      USART_ClearFlag( USART1, USART_FLAG_TC ); // Transmission completed Flag löschen
       tx_buf.status = TXBUF_IDLE;
       // Clear DMA1 Channel4 Half Transfer, Transfer Complete and Global interrupt pending bits
       DMA_ClearITPendingBit( DMA1_IT_GL4 );
@@ -558,7 +558,7 @@ void DMA1_Channel4_IRQHandler( void )
 /******************************************************************************************************
                                              ResetRxBuffer
 -------------------------------------------------------------------------------------------------------
-Setzt die rx_buf Struktur zurï¿½ck
+Setzt die rx_buf Struktur zurück
 
 Parameter:
    Channel:  siehe #defines COM_CHANNEL_x
@@ -624,8 +624,8 @@ void USART1_IRQHandler( void )
 /******************************************************************************************************
                                           RxTsk_CheckForTele
 -------------------------------------------------------------------------------------------------------
-Wird von den Empfangs-IRQs aktiviert wenn die RX-Leitung einen Idle-Zustand erkennt. Dann wird geprï¿½ft
-ob ein Telegramm vollstï¿½ndig angekommen ist und wenn ja darauf geantwortet
+Wird von den Empfangs-IRQs aktiviert wenn die RX-Leitung einen Idle-Zustand erkennt. Dann wird geprüft
+ob ein Telegramm vollständig angekommen ist und wenn ja darauf geantwortet
 ******************************************************************************************************/
 void RxTsk_CheckForTele( u8 Channel )
 {
@@ -645,15 +645,15 @@ void RxTsk_CheckForTele_RS( void )
 /******************************************************************************************************
                                              CheckForTele
 -------------------------------------------------------------------------------------------------------
-Prï¿½ft auf dem angegebenen Kanal ob ein Telegramm vollstï¿½ndig angekommen ist.
-Wenn eine Telegramm angekommen ist stehen in rxb->rdptr die empfangenen Daten, rxb->cnt enthï¿½lt die
+Prüft auf dem angegebenen Kanal ob ein Telegramm vollständig angekommen ist.
+Wenn eine Telegramm angekommen ist stehen in rxb->rdptr die empfangenen Daten, rxb->cnt enthält die
 Anzahl der empfangenen Daten in Byte. In rxb->tid steht die empfangene Telegrammnummer, rxb->channel
-enthï¿½lt den Kanal auf dem empfangen wurde.
+enthält den Kanal auf dem empfangen wurde.
 
 Parameter:
    Channel:  siehe #defines COM_CHANNEL_x
 
-Return: 0 - vollstï¿½ndiges Telegramm angekommen.
+Return: 0 - vollständiges Telegramm angekommen.
        -1 - kein Telegramm vorhanden
 ******************************************************************************************************/
 s16 CheckForTele( u8 Channel )
@@ -673,11 +673,11 @@ s16 CheckForTele( u8 Channel )
    // Ausrechnen wieviele neue Bytes emfangen wurden.
    if ( cc->dma_rx != NULL )
    {
-      // Ausrechnen wieviele neue Bytes emfangen wurden. dma_rx->CNDTR ist der rï¿½ckwï¿½rtszï¿½hlende Counter
-      // der DMA-Hardware (noch zu ï¿½bertragende Bytes, wird in ResetRxBuffer auf sizeof(rxb->buf)
+      // Ausrechnen wieviele neue Bytes emfangen wurden. dma_rx->CNDTR ist der rückwärtszählende Counter
+      // der DMA-Hardware (noch zu übertragende Bytes, wird in ResetRxBuffer auf sizeof(rxb->buf)
       // initialisiert)
       rx_len = rxb->dma_cntr - cc->dma_rx->CNDTR;
-      rxb->dma_cntr = cc->dma_rx->CNDTR;                 // Zï¿½hlerstand der Hardware merken fï¿½rs nï¿½chste mal
+      rxb->dma_cntr = cc->dma_rx->CNDTR;                 // Zählerstand der Hardware merken fürs nächste mal
    }
    else
    {
@@ -697,7 +697,7 @@ s16 CheckForTele( u8 Channel )
                rxb->status = RX_BUF_STATUS_RECEIVE;   // wechseln in Empfangszustand
                rxb->cnt = 0;
                rxb->ESC_received = 0;
-               TimeoutStart( rxb->timeout_time );     // Start Timeout fï¿½r den vollstï¿½ndigen Empfang
+               TimeoutStart( rxb->timeout_time );     // Start Timeout für den vollständigen Empfang
             }
             else if( data == RS_ESC_CHAR )
             {
@@ -707,7 +707,7 @@ s16 CheckForTele( u8 Channel )
             {
                u16 crc_ist, crc_soll;
 
-               // Es mï¿½ssen wenigstens ein Header und eine CRC empfangen worden sein
+               // Es müssen wenigstens ein Header und eine CRC empfangen worden sein
                if ( rxb->cnt < ( sizeof(HeadStrct) + sizeof(crc_soll) ) )
                {
                   ResetRxBuffer( Channel );
@@ -716,7 +716,7 @@ s16 CheckForTele( u8 Channel )
 
                head = (HeadStrct *)rxb->buf;
 
-               // Seriennummer und DeviceClass prï¿½fen. Wert 0 oder richtiger Wert wird jeweils akzeptiert.
+               // Seriennummer und DeviceClass prüfen. Wert 0 oder richtiger Wert wird jeweils akzeptiert.
                if ( ( ( head->snr != 0 ) AND ( head->snr != SERIALNUMBER ) )
             	 OR ( ( head->dci != 0 ) AND ( head->dci != DEVICE_CLASS_ID ) ) )
                {
@@ -726,14 +726,14 @@ s16 CheckForTele( u8 Channel )
 
                rxb->cnt -= 2; // die beiden Bytes von der CRC abziehen
 
-               // CRC prï¿½fen
+               // CRC prüfen
                crc_ist = CalcCrc16( 0, rxb->buf, rxb->cnt );
                rxb->rdptr = rxb->buf + rxb->cnt + 1;     // rdptr zeigt auf das hintere Byte der CRC
                crc_soll = *rxb->rdptr--;
                crc_soll <<= 8;
                crc_soll |= *rxb->rdptr;
 
-               // Channel und tcn werden im Fehlerfall fï¿½rs Nack gebraucht deshalb schon hier speichern
+               // Channel und tcn werden im Fehlerfall fürs Nack gebraucht deshalb schon hier speichern
                rxb->channel = Channel;
                rxb->tcn = head->tcn;
 
@@ -751,7 +751,7 @@ s16 CheckForTele( u8 Channel )
                }
 
                // Zur Sicherheit den Datenbereich mit einer 0 terminieren. Falls jemand mit Strings
-               // im Datenbereich arbeitet sind die dann zuverlï¿½ssig abgeschlossen.
+               // im Datenbereich arbeitet sind die dann zuverlässig abgeschlossen.
                *rxb->rdptr = 0;
 
                // Restlichen RX-Buffer aufbereiten
@@ -760,7 +760,7 @@ s16 CheckForTele( u8 Channel )
                rxb->rdptr = rxb->buf + sizeof(HeadStrct);
                rxb->cnt -= sizeof(HeadStrct);
 
-               // Prï¿½fen ob das angekommene Telegram eine Aufforderung zum Resend des letzten
+               // Prüfen ob das angekommene Telegram eine Aufforderung zum Resend des letzten
                // Telegramms ist. Dies wird hier zentral abgehandelt.
                //if ( (rxb->tid == TID_RESEND_LAST_TELE) OR (rxb->tcn == rxb->last_tcn) )
                //{
@@ -795,8 +795,8 @@ End:
 /******************************************************************************************************
                                             CheckForCommTimeout
 -------------------------------------------------------------------------------------------------------
-Wird vom Sage-Task alle 10ms aufgerufen. Prï¿½ft ob einer der Kanï¿½le mit einem unfertigen Telegramm
-ins Timeout lï¿½uft und resettet den Kanal wenn nï¿½tig.
+Wird vom Sage-Task alle 10ms aufgerufen. Prüft ob einer der Kanäle mit einem unfertigen Telegramm
+ins Timeout läuft und resettet den Kanal wenn nötig.
 ******************************************************************************************************/
 void CheckForCommTimeout( void ) {
    u16 n;
@@ -805,7 +805,7 @@ void CheckForCommTimeout( void ) {
    for ( n = 0 ; n < NUMBER_OF_COM_CHANNELS ; n++ )
    {
       rxb = CommChannel[n].rxb;
-      // Prï¿½fen ob ein Timeout wï¿½hrend des Empfangs aufgetreten ist
+      // Prüfen ob ein Timeout während des Empfangs aufgetreten ist
       if( rxb->timeout_time != 0 )
       {
          if( Timeout( rxb->timeout_time, 10000 ) ) {

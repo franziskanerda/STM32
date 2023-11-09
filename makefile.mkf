@@ -16,10 +16,10 @@ SRCO    =
 CRC_PLACE_HOLDER=0x3101
 
 # Libraries to link in
-LIB1    = ../GccLib/libc.a
-LIB2    = ../GccLib/libm.a
-LIB3    = ../GccLib/libgcc.a
-LIB4    = ../STM32StdLib/stm32stdlib_md_vl.a
+LIB1    = ..\GccLib\libc.a
+LIB2    = ..\GccLib\libm.a
+LIB3    = ..\GccLib\libgcc.a
+LIB4    = ..\STM32StdLib\stm32stdlib_md_vl.a
 LIB5    =
 LIB6    = 
 LIB7    =
@@ -27,12 +27,12 @@ LIB8    =
 LIB9    =
 LIBS    = $(LIB1) $(LIB2) $(LIB3) $(LIB4) $(LIB5) $(LIB6) $(LIB7) $(LIB8) $(LIB9)
 
-INCDIR = -I. -I../STM32StdLib
+INCDIR = -I. -I..\STM32StdLib
 
-TOOLSDIR	=
+TOOLSDIR	=	..\..\Tools\CompileTools
 
 # Name of assembler, compiler and linker
-TOOLPFX = "C:\tools\stm32_10_3_gcc\bin\arm-none-eabi"
+TOOLPFX = arm-none-eabi
 AS=$(TOOLPFX)-as
 CC=$(TOOLPFX)-gcc
 LD=$(TOOLPFX)-ld
@@ -42,9 +42,9 @@ LD=$(TOOLPFX)-ld
 #           -T $(NAME).ld -u _start -static -nostartfiles -nostdlib  -L ..\GccLib -Wl,-Map=$(NAME).map,--gc-sections \
 #           -ffunction-sections 
 
-CCLFLAGS = -mthumb -mcpu=cortex-m3 -O2 -g -Wunused -Winline -Wall -D STM32F10X_MD_VL -ffunction-sections \
+CCLFLAGS = -combine -mthumb -mcpu=cortex-m3 -O2 -g -Wunused -Winline -Wall -D STM32F10X_MD_VL -ffunction-sections \
 			  -D USE_STDPERIPH_DRIVER $(INCDIR) -T $(NAME).ld -u _start -static -nostartfiles -nostdlib \
-			  -L ../GccLib -Wl,-Map=$(NAME).map,--gc-sections -DCRC_PLACE_HOLDER=$(CRC_PLACE_HOLDER)
+			  -L ..\GccLib -Wl,-Map=$(NAME).map,--gc-sections -DCRC_PLACE_HOLDER=$(CRC_PLACE_HOLDER)
 
 #uncrustify = $(suffix $(notdir $(wildcard ../../Tools/CompileTools/*ncrustify.exe)))
 
@@ -59,39 +59,35 @@ rebuild: clean all
 #####################################################################################################################
 .PHONY: clean
 clean:
-	@rm -f *.d
-	@rm -f *.o
-	@rm -f *.elf
-	@rm -f *.bin
-	@rm -f $(NAME).hex
-	@rm -f $(NAME)_pure.hex
-	@rm -f *.map
-	@rm -f *.lst
-	@rm -f *.dbi 
-	@rm -f *.ctx 
-	@rm -f *.xdb 
-	@rm -f *.uncrustify
-	@rm -f *.dat
+	@del *.d >NUL 2>&1
+	@del *.o >NUL 2>&1
+	@del *.elf >NUL 2>&1
+	@del *.bin >NUL 2>&1
+	@del $(NAME).hex >NUL 2>&1
+	@del $(NAME)_pure.hex >NUL 2>&1
+	@del *.map >NUL 2>&1
+	@del *.lst >NUL 2>&1
+	@del *.dbi >NUL 2>&1
+	@del *.ctx >NUL 2>&1
+	@del *.xdb >NUL 2>&1
+	@del *.uncrustify >NUL 2>&1
 
 #####################################################################################################################
 .PHONY: prebuild
 prebuild:
-	@rm -f $(NAME).elf 
-	@rm -f $(NAME).hex  
-	@rm -f $(NAME)_pure.hex  
-	@rm -f $(NAME).lst  
-	@rm -f $(NAME).map
-	@rm -f *.dat
-	@echo GCC compiler version: $< $(shell $(CC) -dumpversion)	
+	@del $(NAME).elf >NUL 2>&1
+	@del $(NAME).hex >NUL 2>&1
+	@del $(NAME)_pure.hex >NUL 2>&1
+	@del $(NAME).lst >NUL 2>&1
+	@del $(NAME).map >NUL 2>&1
 
-#	@rem Code-Beautyfier aufrufen
+	@rem Code-Beautyfier aufrufen
 #ifeq ($(uncrustify),.exe)
 #	@echo - Beautifing the code -
 #	-@for %n in (*.c *.h) do @..\..\Tools\CompileTools\uncrustify.exe -q -l C --replace --no-backup -c uncrustify.cfg %n
 #else
 #	@echo - Uncrustify not found, skipping code beautifying -
 #endif
-
 
 
 #####################################################################################################################
@@ -105,34 +101,30 @@ $(NAME).elf: $(SRCC) $(SRCS) $(SRCO) $(LIBS) makefile.mkf $(NAME).ld
 	@$(TOOLPFX)-nm -n $(NAME).elf >>$(NAME).map
 	@$(TOOLPFX)-objcopy -O binary  $(NAME).elf $(NAME)_pure.bin
 	
-	@echo Die define Zeile nach ver.dat extrahieren
-	@echo "# Application = runf_app"> ver.dat
-	@echo "# Application = runf_app"> verx.dat
-	@sed15 -e "/.*define DEVICE_CLASS_ID/!d;s/.*define DEVICE_CLASS_ID[ ]* \([0-9x]*\).*/# DeviceID = \1/" info.h >> ver.dat
-	@sed15 -e "/.*define DEVICE_CLASS_ID/!d;s/.*define DEVICE_CLASS_ID[ ]* \([0-9x]*\).*/# Device-ID (hex) = \1/" info.h >> verx.dat
-	@sed15 -e "/.*define VERSION_NR/!d;s/.*define VERSION_NR[ ]* \([0-9]*\).*/# Version = \1/" info.h >> ver.dat
-	@sed15 -e "/.*define VERSION_NR/!d;s/.*define VERSION_NR[ ]* \([0-9]*\).*/# Version = \1/" info.h >> verx.dat
-	@echo "# free line for future use"> extension.dat
-	@echo "# free line for future use">> extension.dat
-	@echo Crc in die Infostruktur schreiben lassen
-	@ChangeCrcInIntelHex.Exe $(NAME)_pure.hex $(CRC_PLACE_HOLDER)
+	@rem Die define Zeile nach ver.dat extrahieren
+	@echo # Application = runf_app>ver.dat
+	@echo # Application = runf_app>verx.dat
+	@$(TOOLSDIR)\sed15 -e "/.*define DEVICE_CLASS_ID/!d;s/.*define DEVICE_CLASS_ID[ ]* \([0-9x]*\).*/# DeviceID = \1/" info.h >>ver.dat
+	@$(TOOLSDIR)\sed15 -e "/.*define DEVICE_CLASS_ID/!d;s/.*define DEVICE_CLASS_ID[ ]* \([0-9x]*\).*/# Device-ID (hex) = \1/" info.h >>verx.dat
+	@$(TOOLSDIR)\sed15 -e "/.*define VERSION_NR/!d;s/.*define VERSION_NR[ ]* \([0-9]*\).*/# Version = \1/" info.h >>ver.dat
+	@$(TOOLSDIR)\sed15 -e "/.*define VERSION_NR/!d;s/.*define VERSION_NR[ ]* \([0-9]*\).*/# Version = \1/" info.h >>verx.dat
+	@echo # free line for future use>extension.dat
+	@echo # free line for future use>>extension.dat
 
-	@echo Die VERSION_BUILD Zeile aus ver.dat an den Anfang des
-	@echo Hex-Files schreiben
-#	@copy ver.dat /B + DateTime.txt /B + $(NAME)_pure.bin /B $(NAME).bin 
-#	@copy verx.dat /B + DateTime.txt /B + $(NAME)_pure.hex /B upd.dat  
-	@creat_fw_images.bat
+	@rem Crc in die Infostruktur schreiben lassen
+	@$(TOOLSDIR)\ChangeCrcInIntelHex.Exe $(NAME)_pure.hex $(CRC_PLACE_HOLDER)
 
-	@echo Im Hauptverzeichniss aufrï¿½umen
-	@rm -f *.d  
-	@rm -f ver.dat
-	@rm -f verx.dat
-#	@rm -f upd.dat	
-	@rm -f extension.dat  
-	@rm -f DateTime.txt  
-	@rm -f $(NAME).hex  
-	@rm -f $(NAME)_pure.hex  
-	@rename_hex_file.bat
+	@rem Die #define VERSION_BUILD Zeile aus ver.dat an den Anfang des
+	@rem Hex-Files schreiben
+	@copy verx.dat /B + DateTime.txt /B + extension.dat /B + $(NAME)_pure.hex /B upd.dat >NUL 2>&1
+	@copy ver.dat  /B + DateTime.txt /B + extension.dat /B + $(NAME)_pure.bin /B $(NAME).bin >NUL 2>&1
 
-upload: $(NAME).elf
-	openocd -f stm32f100_openocd.cfg -c "init" -c "targets" -c "program_device ()"
+	@rem Im Hauptverzeichniss aufräumen
+	@del *.d >NUL 2>&1
+	@del ver.dat >NUL 2>&1
+	@del extension.dat >NUL 2>&1
+	@del DateTime.txt >NUL 2>&1
+	@del $(NAME).hex >NUL 2>&1
+	@del $(NAME)_pure.hex >NUL 2>&1
+	@ren upd.dat $(NAME).hex
+

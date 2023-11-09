@@ -22,23 +22,23 @@ extern u8 LedTestFlag;
 
 // AD-Wandler-Schwellwerte fuer die Akkutemperaturen. Berechnung: (Wert aus Datenblatt
 // B57861S0103F040) / (Wert + 1) * 4096. Datenblatttabelle auf 1K bezogen, Spannungsteiler
-// mit 10K. Die Berechnung der Zwischenwerte erfolgt ï¿½ber einfache lineare Interpolation
+// mit 10K. Die Berechnung der Zwischenwerte erfolgt über einfache lineare Interpolation
 const u16 NtcAdAkku[22] =
 {
-//	-25ï¿½C	-20ï¿½C	-15ï¿½C	-10ï¿½C	-5ï¿½C	0ï¿½C		5ï¿½C		10ï¿½C	15ï¿½C	20ï¿½C	25ï¿½C
+//	-25°C	-20°C	-15°C	-10°C	-5°C	0°C		5°C		10°C	15°C	20°C	25°C
     3804,   3713,   3602,   3469,   3313,   3136,   2939,   2726,   2503,   2275,   2048,
-//	30ï¿½C	35ï¿½C	40ï¿½C	45ï¿½C	50ï¿½C	55ï¿½C	60ï¿½C	65ï¿½C	70ï¿½C	75ï¿½C	80ï¿½C
+//	30°C	35°C	40°C	45°C	50°C	55°C	60°C	65°C	70°C	75°C	80°C
     1828,   1618,   1424,   1245,   1085,   942,    816,    706,    611,    528,    458
 };
 
-// AD-Wandler-Schwellwerte fuer die Kï¿½hlkï¿½rpertemperatur. Berechnung: (Wert aus Datenblatt
+// AD-Wandler-Schwellwerte fuer die Kühlkörpertemperatur. Berechnung: (Wert aus Datenblatt
 // NCP18XH103F03RB) / (Wert + 10) * 4096. Datenblatttabelle auf 10K bezogen, Spannungsteiler
-// mit 10K. Die Berechnung der Zwischenwerte erfolgt ï¿½ber lineare Interpolation
+// mit 10K. Die Berechnung der Zwischenwerte erfolgt über lineare Interpolation
 const u16 NtcAdKuehler[22] =
 {
-//	-25ï¿½C	-20ï¿½C	-15ï¿½C	-10ï¿½C	-5ï¿½C	0ï¿½C		5ï¿½C		10ï¿½C	15ï¿½C	20ï¿½C	25ï¿½C
+//	-25°C	-20°C	-15°C	-10°C	-5°C	0°C		5°C		10°C	15°C	20°C	25°C
 	3676,	3572,	3452,	3316,	3163,	2995,	2817,	2629,	2436,	2241,	2048,
-//	30ï¿½C	35ï¿½C	40ï¿½C	45ï¿½C	50ï¿½C	55ï¿½C	60ï¿½C	65ï¿½C	70ï¿½C	75ï¿½C	80ï¿½C
+//	30°C	35°C	40°C	45°C	50°C	55°C	60°C	65°C	70°C	75°C	80°C
 	1860,	1679,	1509,	1350,	1204,	1070,	949,	842,	746,	661,	586
 };
 
@@ -117,7 +117,7 @@ void SageTsk_CheckForAction( void )
 
 			case POWEROFF_CHARGING_INIT:
 			{
-				// Hardware fï¿½r den Ladezustand richtig initialisieren
+				// Hardware für den Ladezustand richtig initialisieren
 				PowerOffCharging ();
 				I2C_Configuration ();
 				DbgPulse (2);
@@ -171,7 +171,7 @@ void SageTsk_CheckForAction( void )
 			break;
 
 			case POWERON_NOTCHARGING_INIT:
-				// Hardware fï¿½r den eingeschalteten Zustand initialisieren
+				// Hardware für den eingeschalteten Zustand initialisieren
 				if ( (ops == POWER_UNKNOWN) || (ops == POWEROFF_NOTCHARGING_LOOP) )
 				{
 					PowerOn ();
@@ -225,7 +225,7 @@ void SageTsk_CheckForAction( void )
 					}
 				}
 
-				if ( (i == 20) && (first == 1) )
+				if ( (i == 18) && (first == 1) )
 				{
 					DispBacklight.Mode = 1;
 					SetDispLedBrightness( AUTOLEDSDISP, 0, 0 );
@@ -237,7 +237,7 @@ void SageTsk_CheckForAction( void )
 
 			case POWERON_CHARGING_INIT:
 
-				// Hardware fï¿½r den Ladezustand richtig initialisieren
+				// Hardware für den Ladezustand richtig initialisieren
 				if ( (ops == POWER_UNKNOWN) || (ops == POWEROFF_NOTCHARGING_LOOP) )
 				{
 					PowerOnCharging ();
@@ -303,7 +303,7 @@ void SageTsk_CheckForAction( void )
 					}
 				}
 
-				if ( (i == 20) && (first == 1) ) 
+				if ( (i == 18) && (first == 1) ) 
 				{
 					DispBacklight.Mode = 1;
 					SetDispLedBrightness( AUTOLEDSDISP, 0, 0 );
@@ -355,7 +355,7 @@ void DoSysAdMeasurements( void )
 	AnalogVals.Akku_mA = (s16) ( (float)AI * 0.15262515) - 5000;// 10000mA / 4095 Stufen / 16 Werte
 	AnalogVals.Akku_mA_LT = (s16) ( (float)AIL * 0.15262515) - 5000;
 
-	// Umrechnung von A/D-Stufen (16 Werte) auf Temperatur (Kï¿½hlkï¿½rpertemperatur)
+	// Umrechnung von A/D-Stufen (16 Werte) auf Temperatur (Kühlkörpertemperatur)
 	KT >>= 4; i = 0; while ( (KT < NtcAdKuehler[i]) && (i<22) ) i++;
 	if (i>0)
 	{
@@ -364,7 +364,7 @@ void DoSysAdMeasurements( void )
 	}
 	else { AnalogVals.TempKuehlDeg = -26; }
 
-	// Helligkeitswert direkt ï¿½bernehmen (0...65536)
+	// Helligkeitswert direkt übernehmen (0...65536)
 	AnalogVals.Ambient_AD = Amb;
 	
 	// Umrechnung von A/D-Stufen (4 Werte) auf Millivolt (USB-Eingang)
@@ -397,7 +397,7 @@ void DoSysAdMeasurements( void )
 	}
 	else { AnalogVals.TempAkku2Deg = -26; }
 
-	//DbgPrintf ("AV = %d mV / AI = %d mA / Hell = %d / UV = %d mV / U1In = %d mV / U2In = %d mV / IIn = %d mA / ST = %d ï¿½C",
+	//DbgPrintf ("AV = %d mV / AI = %d mA / Hell = %d / UV = %d mV / U1In = %d mV / U2In = %d mV / IIn = %d mA / ST = %d °C",
 	//		    AnalogVals.Akku_mV, AnalogVals.Akku_mA, AnalogVals.Ambient_AD, AnalogVals.Usb_mV, AnalogVals.In1_mV, AnalogVals.In2_mV, AnalogVals.InCurr_mA, AnalogVals.Temp_STM/10 );
 }
 

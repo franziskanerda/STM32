@@ -1,0 +1,4 @@
+[Application]
+LoaderTool=ARM
+ApplicationPath=D:\Daten\RunF\Firmware\STM32\runf_app.elf
+Format=ELF

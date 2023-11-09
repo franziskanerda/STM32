@@ -192,6 +192,9 @@ void USART2_IRQHandler( void )
 void USART3_IRQHandler( void )
 { ErrorBlink( ERR_BLINK_IRQUNUSED, FALSE ); }
 
+void EXTI15_10_IRQHandler( void )
+{ ErrorBlink( ERR_BLINK_IRQUNUSED, FALSE ); }
+
 void RTCAlarm_IRQHandler( void )
 { ErrorBlink( ERR_BLINK_IRQUNUSED, FALSE ); }
 

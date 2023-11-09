@@ -95,7 +95,7 @@ Parameter:
 
 Return: CRC
 ******************************************************************************************************/
-u16 CalcCrc16( register u16 Crc, register const void *Start, register u32 Len )
+inline u16 CalcCrc16( register u16 Crc, register const void *Start, register u32 Len ) 
 {
    u8 *MyStart = (u8 *)Start;
 
